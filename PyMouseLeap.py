@@ -18,6 +18,10 @@ Config.read("./config.ini")
 class SampleListener(Leap.Listener):
     def on_init(self, controller):
         print("Initialized")
+        self.swipeleft_count = 0
+        self.swiperight_count = 0
+        self.clockwise_count = 0
+        self.counterclockwise_count = 0
 
     def on_connect(self, controller):
         print("Connected")
@@ -53,21 +57,36 @@ class SampleListener(Leap.Listener):
                 if gesture.type == Leap.Gesture.TYPE_SWIPE:
                     swipe = SwipeGesture(gesture)
                     if swipe.direction[0] > 0:
-                        print("to left")
-                        os.system(Config.get('Commands', 'swiftleft'))
+                        self.swipeleft_count += 1
+                        if self.swipeleft_count == 10:
+                            print("to left")
+                            os.system(Config.get('Commands', 'swiftleft'))
                     else:
-                        print("to right")
-                        os.system(Config.get('Commands', 'swiftright'))
+                        self.swiperight_count += 1
+                        if self.swiperight_count == 10:
+                            print("to right")
+                            os.system(Config.get('Commands', 'swiftright'))
+                else:
+                    self.swipeleft_count = 0
+                    self.swiperight_count = 0
+
 
                 if gesture.type == Leap.Gesture.TYPE_CIRCLE:
                     circle = CircleGesture(gesture)
 
                     if circle.pointable.direction.angle_to(circle.normal) <= Leap.PI/4:
-                        print("clockwise")
-                        os.system(Config.get('Commands', 'clockwise'))
+                        self.clockwise_count += 1
+                        if self.clockwise_count == 10:
+                            print("clockwise")
+                            os.system(Config.get('Commands', 'clockwise'))
                     else:
-                        print("counterclockwise")
-                        os.system(Config.get('Commands', 'counterclockwise'))
+                        self.counterclockwise_count += 1
+                        if self.counterclockwise_count == 10:
+                            print("counterclockwise")
+                            os.system(Config.get('Commands', 'counterclockwise'))
+                else:
+                    self.clockwise_count = 0
+                    self.counterclockwise_count = 0
 
 def main():
     # Create a sample listener and controller

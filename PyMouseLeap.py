@@ -49,9 +49,15 @@ class SampleListener(Leap.Listener):
         frame = controller.frame()
 
         for command in self.commands:
-            if command.applicable(frame):
-                print(command.name)
-                os.system(Config.get(command.name, '1finger'))
+            if len(frame.fingers) > 0 and command.applicable(frame):
+                number_for_fingers = self.get_number_for_fingers_string(frame)
+                syscommand = Config.get(command.name, number_for_fingers)
+                if(syscommand != ""):
+                    os.system(syscommand)
+                    print(syscommand)
+
+    def get_number_for_fingers_string(self, frame):
+        return "%dfinger" % len(frame.fingers)
 
 class ScreentapCommand():
     def __init__(self):

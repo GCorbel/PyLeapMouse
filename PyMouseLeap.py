@@ -17,7 +17,7 @@ from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 Config = ConfigParser.ConfigParser()
 Config.read("./config.ini")
 
-class SampleListener(Leap.Listener):
+class PYMouseListener(Leap.Listener):
     def on_init(self, controller):
         print("Initialized")
         self.commands = [
@@ -72,7 +72,7 @@ class SampleListener(Leap.Listener):
         os.system(command)
 
 def main():
-    listener = SampleListener()
+    listener = PYMouseListener()
     controller = Leap.Controller()
     controller.add_listener(listener)
     print("Press Enter to quit...")

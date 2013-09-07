@@ -22,86 +22,91 @@ class SampleListener(Leap.Listener):
         self.swiperight_count = 0
         self.clockwise_count = 0
         self.counterclockwise_count = 0
+        self.commands = [
+                ScreentapCommand(),
+                SwiperightCommand(),
+                SwipeleftCommand(),
+                CounterclockwiseCommand(),
+                ClockwiseCommand(),
+                KeytapCommand()
+        ]
 
     def on_connect(self, controller):
         print("Connected")
 
-        # Enable gestures
         controller.enable_gesture(Leap.Gesture.TYPE_CIRCLE);
         controller.enable_gesture(Leap.Gesture.TYPE_KEY_TAP);
         controller.enable_gesture(Leap.Gesture.TYPE_SCREEN_TAP);
         controller.enable_gesture(Leap.Gesture.TYPE_SWIPE);
 
     def on_disconnect(self, controller):
-        # Note: not dispatched when running in a debugger.
         print("Disconnected")
 
     def on_exit(self, controller):
         print("Exited")
 
     def on_frame(self, controller):
-        # Get the most recent frame and report some basic information
         frame = controller.frame()
 
-        if not frame.fingers.empty:
-            # Gestures
-            for gesture in frame.gestures():
-                if gesture.type == Leap.Gesture.TYPE_KEY_TAP:
-                    print("key tap")
-                    os.system(Config.get('Commands', 'keytap'))
+        for command in self.commands:
+            if command.applicable(frame):
+                print(command.name)
+                os.system(Config.get(command.name, '1finger'))
 
-                if gesture.type == Leap.Gesture.TYPE_SCREEN_TAP:
-                    print("screen tap")
-                    os.system(Config.get('Commands', 'screentap'))
+class ScreentapCommand():
+    def __init__(self):
+        self.name = "screentap"
 
-                if gesture.type == Leap.Gesture.TYPE_SWIPE:
-                    swipe = SwipeGesture(gesture)
-                    if swipe.direction[0] > 0:
-                        self.swipeleft_count += 1
-                        if self.swipeleft_count == 10:
-                            print("to left")
-                            os.system(Config.get('Commands', 'swiftleft'))
-                    else:
-                        self.swiperight_count += 1
-                        if self.swiperight_count == 10:
-                            print("to right")
-                            os.system(Config.get('Commands', 'swiftright'))
-                else:
-                    self.swipeleft_count = 0
-                    self.swiperight_count = 0
+    def applicable(self, frame):
+        return(frame.gestures()[0].type == Leap.Gesture.TYPE_SCREEN_TAP)
 
+class KeytapCommand():
+    def __init__(self):
+        self.name = "keytap"
 
-                if gesture.type == Leap.Gesture.TYPE_CIRCLE:
-                    circle = CircleGesture(gesture)
+    def applicable(self, frame):
+        return(frame.gestures()[0].type == Leap.Gesture.TYPE_KEY_TAP)
 
-                    if circle.pointable.direction.angle_to(circle.normal) <= Leap.PI/4:
-                        self.clockwise_count += 1
-                        if self.clockwise_count == 10:
-                            print("clockwise")
-                            os.system(Config.get('Commands', 'clockwise'))
-                    else:
-                        self.counterclockwise_count += 1
-                        if self.counterclockwise_count == 10:
-                            print("counterclockwise")
-                            os.system(Config.get('Commands', 'counterclockwise'))
-                else:
-                    self.clockwise_count = 0
-                    self.counterclockwise_count = 0
+class SwiperightCommand():
+    def __init__(self):
+        self.name = "swiperight"
+
+    def applicable(self, frame):
+        swipe = SwipeGesture(frame.gestures()[0])
+        return(swipe.type == Leap.Gesture.TYPE_SWIPE and swipe.direction[0] < 0)
+
+class SwipeleftCommand():
+    def __init__(self):
+        self.name = "swipeleft"
+
+    def applicable(self, frame):
+        swipe = SwipeGesture(frame.gestures()[0])
+        return(swipe.type == Leap.Gesture.TYPE_SWIPE and swipe.direction[0] > 0)
+
+class ClockwiseCommand():
+    def __init__(self):
+        self.name = "clockwise"
+
+    def applicable(self, frame):
+        circle = CircleGesture(frame.gestures()[0])
+        return(circle.type == Leap.Gesture.TYPE_CIRCLE and
+                circle.pointable.direction.angle_to(circle.normal) <= Leap.PI/4)
+
+class CounterclockwiseCommand():
+    def __init__(self):
+        self.name = "counterclockwise"
+
+    def applicable(self, frame):
+        circle = CircleGesture(frame.gestures()[0])
+        return(circle.type == Leap.Gesture.TYPE_CIRCLE and
+                circle.pointable.direction.angle_to(circle.normal) > Leap.PI/4)
 
 def main():
-    # Create a sample listener and controller
     listener = SampleListener()
-
     controller = Leap.Controller()
-
-    # Have the sample listener receive events from the controller
     controller.add_listener(listener)
-
-    # Keep this process running until Enter is pressed
     print("Press Enter to quit...")
     sys.stdin.readline()
-
-    # Remove the sample listener when done
     controller.remove_listener(listener)
 
 

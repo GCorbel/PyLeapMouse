@@ -18,10 +18,6 @@ Config.read("./config.ini")
 class SampleListener(Leap.Listener):
     def on_init(self, controller):
         print("Initialized")
-        self.swipeleft_count = 0
-        self.swiperight_count = 0
-        self.clockwise_count = 0
-        self.counterclockwise_count = 0
         self.commands = [
                 ScreentapCommand(),
                 SwiperightCommand(),

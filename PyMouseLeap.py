@@ -26,6 +26,7 @@ class SampleListener(Leap.Listener):
                 ClockwiseCommand(),
                 KeytapCommand()
         ]
+        self.old_x = None
 
     def on_connect(self, controller):
         print("Connected")
@@ -44,16 +45,29 @@ class SampleListener(Leap.Listener):
     def on_frame(self, controller):
         frame = controller.frame()
 
-        for command in self.commands:
-            if len(frame.fingers) > 0 and command.applicable(frame):
-                number_for_fingers = self.get_number_for_fingers_string(frame)
-                syscommand = Config.get(command.name, number_for_fingers)
-                if(syscommand != ""):
-                    os.system(syscommand)
-                    print(syscommand)
+        if len(frame.fingers) > 0:
+            self.get_position(frame)
+
+            for command in self.commands:
+                if(command.applicable(frame)):
+                    number_for_fingers = self.get_number_for_fingers_string(frame)
+                    syscommand = Config.get(command.name, number_for_fingers)
+                    if(syscommand != ""):
+                        os.system(syscommand)
+                        print(syscommand)
 
     def get_number_for_fingers_string(self, frame):
         return "%dfinger" % len(frame.fingers)
+
+    def get_position(self, frame):
+        finger = frame.fingers[0]
+        x = finger.tip_position[0] / 10
+        y = (250 - finger.tip_position[1]) / 25
+
+        number_for_fingers = self.get_number_for_fingers_string(frame)
+        command = Config.get('move', number_for_fingers, raw=True)
+        command = command % { 'x': x, 'y': y }
+        os.system(command)
 
 class ScreentapCommand():
     def __init__(self):

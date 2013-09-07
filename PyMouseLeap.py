@@ -9,6 +9,8 @@
 import sys, os, ConfigParser
 sys.path.append('./lib')
 sys.path.append('./lib/x64')
+execfile('./Commands.py')
+
 import Leap
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 
@@ -68,54 +70,6 @@ class SampleListener(Leap.Listener):
         command = Config.get('move', number_for_fingers, raw=True)
         command = command % { 'x': x, 'y': y }
         os.system(command)
-
-class ScreentapCommand():
-    def __init__(self):
-        self.name = "screentap"
-
-    def applicable(self, frame):
-        return(frame.gestures()[0].type == Leap.Gesture.TYPE_SCREEN_TAP)
-
-class KeytapCommand():
-    def __init__(self):
-        self.name = "keytap"
-
-    def applicable(self, frame):
-        return(frame.gestures()[0].type == Leap.Gesture.TYPE_KEY_TAP)
-
-class SwiperightCommand():
-    def __init__(self):
-        self.name = "swiperight"
-
-    def applicable(self, frame):
-        swipe = SwipeGesture(frame.gestures()[0])
-        return(swipe.type == Leap.Gesture.TYPE_SWIPE and swipe.direction[0] < 0)
-
-class SwipeleftCommand():
-    def __init__(self):
-        self.name = "swipeleft"
-
-    def applicable(self, frame):
-        swipe = SwipeGesture(frame.gestures()[0])
-        return(swipe.type == Leap.Gesture.TYPE_SWIPE and swipe.direction[0] > 0)
-
-class ClockwiseCommand():
-    def __init__(self):
-        self.name = "clockwise"
-
-    def applicable(self, frame):
-        circle = CircleGesture(frame.gestures()[0])
-        return(circle.type == Leap.Gesture.TYPE_CIRCLE and
-                circle.pointable.direction.angle_to(circle.normal) <= Leap.PI/4)
-
-class CounterclockwiseCommand():
-    def __init__(self):
-        self.name = "counterclockwise"
-
-    def applicable(self, frame):
-        circle = CircleGesture(frame.gestures()[0])
-        return(circle.type == Leap.Gesture.TYPE_CIRCLE and
-                circle.pointable.direction.angle_to(circle.normal) > Leap.PI/4)
 
 def main():
     listener = SampleListener()

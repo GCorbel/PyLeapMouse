@@ -50,7 +50,6 @@ class ClockwiseCommand(LongCommand):
         return(circle.type == Leap.Gesture.TYPE_CIRCLE and
                 circle.pointable.direction.angle_to(circle.normal) <= Leap.PI/4)
 
-
 class CounterclockwiseCommand(LongCommand):
     def __init__(self):
         self.name = "counterclockwise"
